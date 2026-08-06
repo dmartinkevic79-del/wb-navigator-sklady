@@ -50,6 +50,11 @@
             margin: 0; padding: 0; 
             -webkit-font-smoothing: antialiased;
             transition: background-color 0.3s ease, color 0.3s ease;
+            
+            /* Новые свойства для правильного поведения при малом контенте и клавиатуре */
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -57,9 +62,24 @@
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--wb-accent); }
 
-        .container { display: block; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.4s ease; }
-        .content-padding { padding: 0 24px 60px 24px; }
-        @media (min-width: 768px) { .content-padding { padding: 0 48px 60px 48px; } }
+        .container { 
+            display: flex; 
+            flex-direction: column;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1400px; 
+            margin: 0 auto; 
+            animation: fadeIn 0.4s ease; 
+        }
+        
+        .content-padding { 
+            padding: 0 24px 24px 24px; 
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        @media (min-width: 768px) { .content-padding { padding: 0 48px 24px 48px; } }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
@@ -105,7 +125,7 @@
         .tab-count { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 700; }
         .tab-button.active .tab-count { background: rgba(203, 17, 171, 0.15); color: var(--wb-accent); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; padding-top: 32px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; padding-top: 32px; width: 100%; }
 
         .card { 
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; 
@@ -154,7 +174,19 @@
         .route-btn:hover { opacity: 0.9; }
 
         .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; }
-        .footer-copyright { text-align: center; margin-top: 60px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); opacity: 0.5; }
+        
+        /* Изменения футера: margin-top: auto отталкивает его в самый низ */
+        .footer-copyright { 
+            text-align: center; 
+            margin-top: auto; 
+            padding-top: 40px;
+            padding-bottom: 24px;
+            font-size: 11px; 
+            font-weight: 700; 
+            letter-spacing: 1.5px; 
+            color: var(--text-muted); 
+            opacity: 0.5; 
+        }
 
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-color); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: bottom 0.4s ease; z-index: 2000; }
         #toast.show { bottom: 40px; }
@@ -175,7 +207,8 @@
         </div>
         <div class="search-container">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" placeholder="Поиск по названию, ID или адресу..." oninput="filterCards()">
+            <!-- Изменен oninput для использования debounce -->
+            <input type="text" id="searchInput" placeholder="Поиск по названию, ID или адресу..." oninput="onSearchInput()">
             <button id="clearSearchBtn" class="clear-btn" onclick="clearSearch()">&times;</button>
         </div>
         <nav class="nav-tabs" id="tabsContainer"></nav>
@@ -190,7 +223,7 @@
                 <p style="color: var(--text-muted); font-size: 14px;">Пожалуйста, подождите. Если загрузка идет долго, возможно, iOS блокирует скрипт.</p>
              </div>
         </main>
-        <div class="footer-copyright">DEVELOPED BY D. MARTINKEVICH FOR WAREHOUSE NAVIGATOR</div>
+        <div class="footer-copyright">Designed specifically for Surovitsky</div>
     </div>
 </div> 
 
@@ -204,6 +237,7 @@ let warehousesData = [];
 let favorites = JSON.parse(localStorage.getItem('wb_wh_favorites_v3')) || [];
 let currentTab = 'Все склады';
 const tabsList = ['Все склады', 'Избранное'];
+let searchTimeout; // Переменная для таймера поиска (debounce)
 
 document.addEventListener("DOMContentLoaded", function() {
     initTheme();
@@ -261,7 +295,6 @@ function fetchSingleSheetData(sheetName, callback) {
             data.table.rows.forEach(function(row) {
                 let title = getCellValue(row, 1).trim();
                 
-                // ИСПРАВЛЕНИЕ №1: Убрал проверку index === 0, чтобы Голицыно загрузилось.
                 // Отсекаем только если это реально пустая строка или заголовок таблицы
                 if (!title || title.toLowerCase() === 'склад' || title === '№' || title.toLowerCase() === 'название склада') return;
 
@@ -290,7 +323,7 @@ function fetchSingleSheetData(sheetName, callback) {
                 let pmRoutes = getCellValue(row, 18).trim();
                 let mgRoutes = getCellValue(row, 19).trim();
 
-                // ИСПРАВЛЕНИЕ №2: Объединяем все 3 колонки типов хранения (20, 21, 22)
+                // Объединяем все 3 колонки типов хранения (20, 21, 22)
                 let st1 = getCellValue(row, 20).trim(); // Стеллажное
                 let st2 = getCellValue(row, 21).trim(); // Напольное
                 let st3 = getCellValue(row, 22).trim(); // Кламперное
@@ -462,16 +495,27 @@ function toggleTheme() {
     updateThemeIcon();
 }
 
-function filterCards() {
+// Новая функция поиска с задержкой (debounce)
+function onSearchInput() {
     const query = document.getElementById('searchInput').value.trim();
     document.getElementById('clearSearchBtn').style.display = query.length > 0 ? 'flex' : 'none';
-    renderCards(query);
+    
+    // Очищаем предыдущий таймер, если пользователь продолжает печатать
+    clearTimeout(searchTimeout);
+    
+    // Запускаем новый таймер на 300мс
+    searchTimeout = setTimeout(function() {
+        renderCards(query);
+    }, 300);
 }
 
 function clearSearch(shouldRender = true) {
     document.getElementById('searchInput').value = '';
     document.getElementById('clearSearchBtn').style.display = 'none';
-    if (shouldRender) renderCards();
+    if (shouldRender) {
+        clearTimeout(searchTimeout); // Сбрасываем таймер при очистке
+        renderCards('');
+    }
 }
 
 async function shareApp() {
