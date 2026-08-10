@@ -118,7 +118,6 @@
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; padding-top: 32px; width: 100%; }
 
-        /* Изменения в карточке: курсор и анимация нажатия */
         .card { 
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; 
             padding: 22px; display: flex; flex-direction: column; 
@@ -139,7 +138,6 @@
         .card-title-group { display: flex; flex-direction: column; gap: 8px; max-width: 82%; }
         .card h3 { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.3; }
         
-        /* Контейнер для нескольких ID и сами плашки */
         .id-badges-container { display: flex; flex-wrap: wrap; gap: 6px; }
         .warehouse-id-badge { display: inline-block; font-size: 12px; font-weight: 700; color: var(--wb-accent); background: rgba(203, 17, 171, 0.12); padding: 2px 8px; border-radius: 6px; width: fit-content; }
 
@@ -280,7 +278,6 @@ let currentTab = 'Все склады';
 const tabsList = ['Все склады', 'Избранное'];
 let searchTimeout; 
 
-// Переменная для хранения текста копирования
 let rawTextToCopy = "";
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -343,7 +340,6 @@ function fetchSingleSheetData(sheetName, callback) {
                 let id2 = getCellValue(row, 3);
                 let id3 = getCellValue(row, 4);
                 let id4 = getCellValue(row, 5);
-                // Сохраняем массив ID вместо строки
                 let idsArr = [id1, id2, id3, id4].filter(function(v) { return v !== ''; });
 
                 let statusText = getCellValue(row, 6).trim() || 'Неизвестно';
@@ -375,6 +371,9 @@ function fetchSingleSheetData(sheetName, callback) {
                 
                 let storageType = activeStorageTypes.length > 0 ? activeStorageTypes.join(', ') : '';
                 let storagePlaces = getCellValue(row, 23).trim();
+                
+                // ВАЖНО: Укажи правильный номер колонки для "Запуск МГТ" (сейчас стоит 24 - это колонка Y)
+                let mgtLaunch = getCellValue(row, 24).trim(); 
 
                 warehousesData.push({
                     id: 'wh_' + Math.random().toString(36).substr(2, 9),
@@ -382,7 +381,7 @@ function fetchSingleSheetData(sheetName, callback) {
                     type: type, ownership: ownership, fbs: fbs, fbo: fbo, brak: brak,
                     area: area, gates: gates, address: address,
                     pmRoutes: pmRoutes, mgRoutes: mgRoutes, 
-                    storageType: storageType, storagePlaces: storagePlaces
+                    storageType: storageType, storagePlaces: storagePlaces, mgtLaunch: mgtLaunch
                 });
             });
         }
@@ -424,7 +423,6 @@ function renderCards(filterQuery = '') {
     let filtered = warehousesData.filter(function(item) {
         if (isSearching) {
             const q = filterQuery.toLowerCase();
-            // Поиск по всем ID в массиве
             const matchesId = item.ids.some(function(id) { return id.toLowerCase().includes(q); });
             
             return item.title.toLowerCase().includes(q) || 
@@ -451,7 +449,6 @@ function renderCards(filterQuery = '') {
         const displayAddress = highlightText(wh.address, filterQuery);
         const mapUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(wh.address)}`;
 
-        // Формируем отдельные плашки для ID
         let idsHtml = '';
         if (wh.ids.length > 0) {
             idsHtml = wh.ids.map(function(id) {
@@ -479,11 +476,13 @@ function renderCards(filterQuery = '') {
         if (wh.storagePlaces && wh.storagePlaces !== 'NaN' && wh.storagePlaces !== 'null') {
             specsHtml += `<div class="spec-item"><span class="spec-label">Кол-во мест</span><span class="spec-value">${wh.storagePlaces}</span></div>`;
         }
+        // ДОБАВЛЕНО ВЫВОД ПОЛЯ "ЗАПУСК МГТ"
+        if (wh.mgtLaunch && wh.mgtLaunch !== 'NaN' && wh.mgtLaunch !== 'null' && wh.mgtLaunch !== '-') {
+            specsHtml += `<div class="spec-item"><span class="spec-label">Запуск МГТ</span><span class="spec-value">${wh.mgtLaunch}</span></div>`;
+        }
 
         const cardElement = document.createElement('div');
         cardElement.className = `card status-${wh.statusColor}`;
-        
-        // Клик по карточке открывает окно
         cardElement.onclick = function() { openModal(wh.id); };
 
         cardElement.innerHTML = `
@@ -494,7 +493,6 @@ function renderCards(filterQuery = '') {
                     </div>
                     <h3>${displayTitle}</h3>
                 </div>
-                <!-- stopPropagation не даёт сработать клику по карточке -->
                 <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${wh.id}')">${isFav ? '★' : '☆'}</button>
             </div>
 
@@ -512,7 +510,6 @@ function renderCards(filterQuery = '') {
 
             <div class="card-footer">
                 <div class="status-badge"><span class="dot"></span> ${wh.statusText}</div>
-                <!-- stopPropagation не даёт сработать клику по карточке -->
                 <a href="${mapUrl}" target="_blank" class="route-btn" onclick="event.stopPropagation();">Маршрут 🗺️</a>
             </div>
         `;
@@ -520,15 +517,12 @@ function renderCards(filterQuery = '') {
     });
 }
 
-// --- ФУНКЦИИ ВСПЛЫВАЮЩЕГО ОКНА ---
 function openModal(id) {
-    // Ищем нужный склад в загруженных данных
     const wh = warehousesData.find(function(w) { return w.id === id; });
     if (!wh) return;
 
     let idsText = wh.ids.length > 0 ? wh.ids.join(', ') : 'N/A';
     
-    // Собираем теги для текста
     let tags = [];
     if(wh.type !== '-') tags.push(wh.type);
     if(wh.ownership !== '-') tags.push(wh.ownership);
@@ -538,13 +532,18 @@ function openModal(id) {
     
     let tagsStr = tags.length > 0 ? tags.join(', ') : 'Нет';
 
+    // Формируем дополнительную строку для окна, если "Запуск МГТ" заполнен
+    let mgtLaunchStr = (wh.mgtLaunch && wh.mgtLaunch !== 'NaN' && wh.mgtLaunch !== 'null' && wh.mgtLaunch !== '-') 
+        ? `\n🚀 Запуск МГТ: ${wh.mgtLaunch}` 
+        : '';
+
     rawTextToCopy = `🏭 Склад: ${wh.title}
 🆔 ID: ${idsText}
 📍 Адрес: ${wh.address}
 
 📐 Площадь: ${wh.area}
 🚪 Ворота: ${wh.gates}
-🏷️ Категории: ${tagsStr}`;
+🏷️ Категории: ${tagsStr}${mgtLaunchStr}`;
 
     document.getElementById('copyContent').innerText = rawTextToCopy;
     
@@ -567,7 +566,6 @@ function closeModal() {
     
     setTimeout(function() {
         overlay.style.display = 'none';
-        // Возвращаем кнопку в исходное состояние
         const btn = document.getElementById('btnCopyMain');
         btn.innerHTML = '📋 Скопировать всё';
         btn.style.background = 'var(--wb-gradient)';
@@ -578,7 +576,7 @@ function copyModalText() {
     navigator.clipboard.writeText(rawTextToCopy).then(function() {
         const btn = document.getElementById('btnCopyMain');
         btn.innerHTML = '✅ Успешно скопировано!';
-        btn.style.background = '#10b981'; // зелёный цвет успеха
+        btn.style.background = '#10b981'; 
         
         setTimeout(function() {
             closeModal();
@@ -587,7 +585,6 @@ function copyModalText() {
         alert('Не удалось скопировать. Возможно, ваш браузер это блокирует.');
     });
 }
-// ---------------------------------
 
 function showToast(message) {
     const toast = document.getElementById('toast');
@@ -596,7 +593,7 @@ function showToast(message) {
 }
 
 function toggleFavorite(event, id) {
-    event.preventDefault(); event.stopPropagation(); // Блокируем всплытие, чтобы не открылось окно
+    event.preventDefault(); event.stopPropagation(); 
     if (favorites.includes(id)) {
         favorites = favorites.filter(function(f) { return f !== id; });
         showToast('Удалено из избранного');
