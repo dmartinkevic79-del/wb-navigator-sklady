@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Навигатор по Складам WB</title>
     
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wildberries_logo_2021.svg/1200px-Wildberries_logo_2021.svg.png">
@@ -44,15 +44,12 @@
         }
 
         body {
-            background-color: var(--bg-color); 
-            color: var(--text-main);
+            background-color: var(--bg-color); color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; padding: 0; 
+            margin: 0; padding: 0; min-height: 100vh;
+            display: flex; flex-direction: column;
             -webkit-font-smoothing: antialiased;
             transition: background-color 0.3s ease, color 0.3s ease;
-            min-height: 100dvh;
-            display: flex;
-            flex-direction: column;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -66,9 +63,7 @@
             animation: fadeIn 0.4s ease; 
         }
         
-        .content-padding { 
-            padding: 0 24px 24px 24px; display: flex; flex-direction: column; flex-grow: 1;
-        }
+        .content-padding { padding: 0 24px 24px 24px; display: flex; flex-direction: column; flex-grow: 1; }
         @media (min-width: 768px) { .content-padding { padding: 0 48px 24px 48px; } }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -99,7 +94,7 @@
         .search-container input { width: 100%; box-sizing: border-box; padding: 14px 20px 14px 48px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 16px; outline: none; }
         .search-container input:focus { border-color: var(--wb-accent); }
         
-        .clear-btn { position: absolute; right: 16px; background: transparent; border: none; outline: none; color: var(--text-muted); font-size: 22px; cursor: pointer; display: none; width: 24px; height: 24px; }
+        .clear-btn { position: absolute; right: 16px; background: transparent; border: none; outline: none; color: var(--text-muted); font-size: 22px; cursor: pointer; display: none; width: 24px; height: 24px; align-items: center; justify-content: center; }
 
         mark.highlight { background: var(--highlight-bg); color: inherit; border-radius: 3px; padding: 0 2px; }
 
@@ -116,59 +111,77 @@
         .tab-count { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 700; }
         .tab-button.active .tab-count { background: rgba(203, 17, 171, 0.15); color: var(--wb-accent); }
 
+        .offline-badge {
+            background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);
+            font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; display: none;
+        }
+        .offline-badge.visible { display: inline-block; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; padding-top: 32px; width: 100%; }
 
         .card { 
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; 
             padding: 22px; display: flex; flex-direction: column; 
             transition: all 0.25s ease; position: relative; overflow: hidden;
-            cursor: pointer;
+            cursor: pointer; outline: none;
         }
+        .card:focus-visible { border-color: var(--wb-accent); box-shadow: 0 0 0 2px var(--wb-accent); }
         .card:active { transform: scale(0.98); }
-        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background-color: var(--card-status-color, #3b82f6); }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background-color: var(--card-status-color, #10b981); }
         
         .card.status-green { --card-status-color: #10b981; }
         .card.status-red { --card-status-color: #ef4444; }
         .card.status-yellow { --card-status-color: #f59e0b; }
-        .card.status-blue { --card-status-color: #3b82f6; }
 
         .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-hover); }
 
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-        .card-title-group { display: flex; flex-direction: column; gap: 8px; max-width: 82%; }
-        .card h3 { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.3; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-title-group { display: flex; flex-direction: column; gap: 6px; max-width: 85%; }
+        .card h3 { margin: 0; font-size: 19px; font-weight: 800; line-height: 1.3; color: var(--text-main); }
         
-        .id-badges-container { display: flex; flex-wrap: wrap; gap: 6px; }
-        .warehouse-id-badge { display: inline-block; font-size: 12px; font-weight: 700; color: var(--wb-accent); background: rgba(203, 17, 171, 0.12); padding: 2px 8px; border-radius: 6px; width: fit-content; }
+        .id-badges-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; }
+        .warehouse-id-badge { 
+            display: inline-block; font-size: 12px; font-weight: 800; 
+            color: #ff71e1; background: rgba(203, 17, 171, 0.18); 
+            border: 1px solid rgba(203, 17, 171, 0.3);
+            padding: 2px 10px; border-radius: 6px; width: fit-content; 
+        }
 
-        .fav-btn { background: transparent; border: none; cursor: pointer; font-size: 22px; color: var(--text-muted); opacity: 0.6; transition: all 0.2s; padding: 0; }
-        .fav-btn:hover { opacity: 1; transform: scale(1.1); }
+        .fav-btn { background: transparent; border: none; cursor: pointer; font-size: 22px; color: var(--text-muted); opacity: 0.6; transition: all 0.2s; padding: 0; outline: none; }
+        .fav-btn:hover, .fav-btn:focus-visible { opacity: 1; transform: scale(1.1); color: #f59e0b; }
         .fav-btn.active { color: #f59e0b; opacity: 1; }
 
         .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
         .tag { background: var(--tag-bg); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--tag-text); }
-        .tag-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2); }
-        .tag-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.2); }
+        .tag-type { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border-color: rgba(245, 158, 11, 0.25); }
+        .tag-ownership { background: rgba(148, 163, 184, 0.12); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.25); }
+        .tag-active { background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.25); }
+        .tag-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
 
-        .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: var(--inner-box-bg); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border-color); }
+        .specs-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; 
+            background: var(--inner-box-bg); padding: 14px; border-radius: 12px; 
+            margin-bottom: 16px; border: 1px solid var(--border-color); 
+        }
         .spec-item { display: flex; flex-direction: column; font-size: 12px; }
-        .spec-label { color: var(--text-muted); font-size: 11px; margin-bottom: 2px; }
-        .spec-value { font-weight: 700; color: var(--text-main); }
+        .spec-item.full-width { grid-column: 1 / -1; }
+        .spec-label { color: var(--text-muted); font-size: 11px; margin-bottom: 3px; font-weight: 500; }
+        .spec-value { font-weight: 700; color: var(--text-main); line-height: 1.3; }
 
         .address-box { font-size: 13px; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px; display: flex; gap: 8px; align-items: flex-start; }
         .address-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
 
         .card-footer { border-top: 1px solid var(--border-color); padding-top: 14px; display: flex; justify-content: space-between; align-items: center; margin-top: auto; font-size: 13px; font-weight: 600; }
-        .status-badge { display: flex; align-items: center; font-size: 12px; }
+        .status-badge { display: flex; align-items: center; font-size: 12px; font-weight: 700; }
         .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
         .status-green .dot { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
         .status-red .dot { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
         .status-yellow .dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
 
-        .route-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--wb-gradient); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: opacity 0.2s; }
-        .route-btn:hover { opacity: 0.9; }
+        .route-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--wb-gradient); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: opacity 0.2s; outline: none; }
+        .route-btn:hover, .route-btn:focus-visible { opacity: 0.9; box-shadow: 0 0 0 2px rgba(203, 17, 171, 0.5); }
 
-        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; }
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; }
         
         .footer-copyright { 
             text-align: center; margin-top: auto; padding-top: 40px; padding-bottom: 24px;
@@ -178,9 +191,6 @@
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-color); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: bottom 0.4s ease; z-index: 2000; }
         #toast.show { bottom: 40px; }
 
-        .iphone-error { border: 2px dashed #ef4444; padding: 20px; border-radius: 16px; background: rgba(239, 68, 68, 0.1); display: inline-block; max-width: 500px; margin: 0 auto; text-align: left; }
-
-        /* --- СТИЛИ ДЛЯ ВСПЛЫВАЮЩЕГО ОКНА --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.6); z-index: 2000;
@@ -200,457 +210,837 @@
         .modal-bottom.active { transform: translateY(0); }
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 800; }
-        .close-modal { 
-            background: var(--tag-bg); color: var(--text-main); border: 1px solid var(--border-color);
-            border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; 
-        }
+        .modal-title { font-size: 18px; font-weight: 800; margin: 0; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 0; outline: none; }
+        .close-modal:focus-visible { color: var(--wb-accent); }
         
-        .copy-text-area {
-            background-color: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.5;
-            white-space: pre-wrap; font-family: monospace; color: var(--text-main);
-            margin-bottom: 20px;
-        }
-
+        .modal-content-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .modal-list-item { background: var(--inner-box-bg); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+        .modal-list-value { font-size: 14px; font-weight: 700; color: var(--text-main); text-align: right; word-break: break-word; max-width: 65%; }
+        
         .btn-copy-big {
             width: 100%; background: var(--wb-gradient); color: white; border: none;
             padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700;
-            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-            transition: opacity 0.2s;
+            cursor: pointer; transition: opacity 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; outline: none;
         }
-        .btn-copy-big:hover { opacity: 0.9; }
+        .btn-copy-big:hover, .btn-copy-big:focus-visible { opacity: 0.9; box-shadow: 0 0 0 2px rgba(203, 17, 171, 0.5); }
+
+        @media (min-width: 768px) {
+            .modal-bottom { max-width: 440px; left: 50%; right: auto; margin-left: -220px; border-radius: 20px; bottom: 50%; transform: translateY(50%) scale(0.9); opacity: 0; }
+            .modal-bottom.active { transform: translateY(50%) scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container" id="mainContainer">
+<div class="container">
     <div class="sticky-header">
         <div class="header-area">
-            <h1>🏬 Навигатор по складам</h1>
+            <h1>🏬 Навигатор по складам <span id="offlineBadge" class="offline-badge">Оффлайн кэш</span></h1>
             <div class="header-actions">
-                <button class="icon-btn" onclick="toggleTheme()" id="themeIcon">☀️</button>
-                <button class="share-btn" onclick="shareApp()">Поделиться</button>
+                <button class="icon-btn" id="themeIcon" aria-label="Переключить тему">☀️</button>
+                <button class="share-btn">Поделиться 📤</button>
             </div>
         </div>
+
         <div class="search-container">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" placeholder="Поиск по названию, ID или адресу..." oninput="onSearchInput()">
-            <button id="clearSearchBtn" class="clear-btn" onclick="clearSearch()">&times;</button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" placeholder="Поиск по названию, ID или адресу..." aria-label="Поиск по складам">
+            <button id="clearSearchBtn" class="clear-btn" aria-label="Очистить поиск">&times;</button>
         </div>
-        <nav class="nav-tabs" id="tabsContainer"></nav>
+
+        <nav class="nav-tabs" id="tabsContainer" role="tablist">
+            <!-- Вкладки генерируются через JS -->
+        </nav>
     </div>
 
     <div class="content-padding">
-        <main id="contentArea" class="grid">
-             <div class="empty-state">
-                <span style="font-size:48px; display:inline-block; animation: spin 1.5s linear infinite;">⏳</span>
-                <h3>Подключение к базе данных...</h3>
-                <p style="color: var(--text-muted); font-size: 14px;">Пожалуйста, подождите. Если загрузка идет долго, возможно, iOS блокирует скрипт.</p>
-             </div>
-        </main>
+        <main id="contentArea" class="grid" role="main"></main>
         <div class="footer-copyright">Designed specifically for Surovitsky</div>
     </div>
-</div> 
-
-<!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-<div class="modal-bottom" id="infoModal">
-    <div class="modal-header">
-        <div class="modal-title">Информация о складе</div>
-        <div class="close-modal" onclick="closeModal()">✕</div>
-    </div>
-    <div class="copy-text-area" id="copyContent">Здесь будет текст</div>
-    <button class="btn-copy-big" id="btnCopyMain" onclick="copyModalText()">
-        📋 Скопировать всё
-    </button>
 </div>
 
-<div id="toast">Уведомление</div>
+<div class="modal-overlay" id="modalOverlay" aria-hidden="true"></div>
+<div class="modal-bottom" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Информация о складе</h3>
+        <button class="close-modal" aria-label="Закрыть">&times;</button>
+    </div>
+    <div class="modal-content-list" id="modalList"></div>
+    <button class="btn-copy-big" id="btnCopyMain">📋 Скопировать данные</button>
+</div>
+
+<div id="toast" role="alert" aria-live="polite">Уведомление</div>
 
 <script>
-const SHEET_ID = '1iZnxEpS-KkxqVZjI_C4dAM71nYpLfBuQagDE-rfY-xU'; 
-const SHEET_NAME = 'Лист1'; 
+    const SHEET_ID = '1iZnxEpS-KkxqVZjI_C4dAM71nYpLfBuQagDE-rfY-xU';
+    const SHEET_NAME = 'Лист1';
 
-let warehousesData = [];
-let favorites = JSON.parse(localStorage.getItem('wb_wh_favorites_v3')) || [];
-let currentTab = 'Все склады';
-const tabsList = ['Все склады', 'Избранное'];
-let searchTimeout; 
-
-let rawTextToCopy = "";
-
-document.addEventListener("DOMContentLoaded", function() {
-    initTheme();
-    loadSheetData();
-});
-
-function getCellValue(row, colIndex) {
-    if (!row || !row.c || colIndex >= row.c.length || row.c[colIndex] === null || row.c[colIndex] === undefined || row.c[colIndex].v === null || row.c[colIndex].v === undefined) {
-        return '';
-    }
-    return String(row.c[colIndex].v);
-}
-
-function loadSheetData() {
-    warehousesData = [];
-    fetchSingleSheetData(SHEET_NAME, function(success) {
-        if(success) {
-            renderTabs();
-            renderCards();
-        }
-    });
-}
-
-function fetchSingleSheetData(sheetName, callback) {
-    const callbackName = 'handler_' + Math.random().toString(36).substr(2, 9);
-    
-    let timeout = setTimeout(function() {
-        const container = document.getElementById('contentArea');
-        container.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
-                <div class="iphone-error">
-                    <h3 style="color: #ef4444; margin-top:0;">⚠️ Ошибка доступа к интернету</h3>
-                    <p style="font-size: 14px; margin-bottom: 8px;"><b>Вы открыли файл в режиме предпросмотра внутри архива .zip или мессенджера (Telegram).</b></p>
-                    <p style="font-size: 14px;">Apple iOS в целях безопасности блокирует загрузку данных (таблиц) в таком режиме.</p>
-                    <hr style="border-color: rgba(239,68,68,0.3); margin: 16px 0;">
-                    <p style="font-size: 14px; font-weight: bold;">Как это исправить:</p>
-                    <ol style="font-size: 14px; margin-bottom: 0; padding-left: 20px;">
-                        <li>Извлеките (распакуйте) файл из .zip архива.</li>
-                        <li>Сохраните файл в приложение «Файлы» (Files) на iPhone.</li>
-                        <li>Откройте приложение «Файлы», нажмите на этот HTML-файл долгим тапом.</li>
-                        <li>Выберите <b>«Поделиться»</b> и затем <b>«Открыть в Safari»</b> (или другой полноценный браузер).</li>
-                    </ol>
-                </div>
-            </div>
-        `;
-        callback(false);
-    }, 4000); 
-
-    window[callbackName] = function(data) {
-        clearTimeout(timeout); 
-        
-        if (data && data.table && data.table.rows) {
-            data.table.rows.forEach(function(row) {
-                let title = getCellValue(row, 1).trim();
-                
-                if (!title || title.toLowerCase() === 'склад' || title === '№' || title.toLowerCase() === 'название склада') return;
-
-                let id1 = getCellValue(row, 2);
-                let id2 = getCellValue(row, 3);
-                let id3 = getCellValue(row, 4);
-                let id4 = getCellValue(row, 5);
-                let idsArr = [id1, id2, id3, id4].filter(function(v) { return v !== ''; });
-
-                let statusText = getCellValue(row, 6).trim() || 'Неизвестно';
-                let statusColor = 'yellow';
-                if (statusText.toLowerCase().indexOf('активен') !== -1) statusColor = 'green';
-                if (statusText.toLowerCase().indexOf('закрыт') !== -1 || statusText.toLowerCase().indexOf('не активен') !== -1) statusColor = 'red';
-
-                let fbs = getCellValue(row, 8).toLowerCase() === 'да';
-                let fbo = getCellValue(row, 9).toLowerCase() === 'да';
-                let brak = getCellValue(row, 10).toLowerCase() === 'да';
-
-                let type = getCellValue(row, 11).trim() || '-';
-                let ownership = getCellValue(row, 12).trim() || '-';
-                let area = getCellValue(row, 13).trim() || '-';
-                if (area !== '-' && area.indexOf('кв') === -1) area += ' кв.м';
-                let gates = getCellValue(row, 16).trim() || '-';
-                let address = getCellValue(row, 17).trim() || 'Адрес не указан';
-                let pmRoutes = getCellValue(row, 18).trim();
-                let mgRoutes = getCellValue(row, 19).trim();
-
-                let st1 = getCellValue(row, 20).trim(); 
-                let st2 = getCellValue(row, 21).trim(); 
-                let st3 = getCellValue(row, 22).trim(); 
-                
-                let activeStorageTypes = [];
-                if (st1 && st1.toLowerCase() !== 'нет' && st1 !== 'nan' && st1 !== '0' && st1 !== '-') activeStorageTypes.push('Стеллажное');
-                if (st2 && st2.toLowerCase() !== 'нет' && st2 !== 'nan' && st2 !== '0' && st2 !== '-') activeStorageTypes.push('Напольное');
-                if (st3 && st3.toLowerCase() !== 'нет' && st3 !== 'nan' && st3 !== '0' && st3 !== '-') activeStorageTypes.push('Кламперное');
-                
-                let storageType = activeStorageTypes.length > 0 ? activeStorageTypes.join(', ') : '';
-                let storagePlaces = getCellValue(row, 23).trim();
-                
-                // ВАЖНО: Укажи правильный номер колонки для "Запуск МГТ" (сейчас стоит 24 - это колонка Y)
-                let mgtLaunch = getCellValue(row, 24).trim(); 
-
-                warehousesData.push({
-                    id: 'wh_' + Math.random().toString(36).substr(2, 9),
-                    title: title, ids: idsArr, statusColor: statusColor, statusText: statusText,
-                    type: type, ownership: ownership, fbs: fbs, fbo: fbo, brak: brak,
-                    area: area, gates: gates, address: address,
-                    pmRoutes: pmRoutes, mgRoutes: mgRoutes, 
-                    storageType: storageType, storagePlaces: storagePlaces, mgtLaunch: mgtLaunch
-                });
-            });
-        }
-        callback(true);
+    const STORAGE_KEYS = {
+        favorites: 'wb_wh_favorites_v6',
+        theme: 'wb_theme_v1',
+        cache: 'wb_wh_cache_v1'
     };
 
-    const script = document.createElement('script');
-    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=responseHandler:${callbackName}`;
-    document.body.appendChild(script);
-}
+    // Единожды вычисляем доступность localStorage
+    const HAS_STORAGE = (function() {
+        try {
+            const testKey = '__wb_test__';
+            localStorage.setItem(testKey, '1');
+            localStorage.removeItem(testKey);
+            return true;
+        } catch (e) { return false; }
+    })();
 
-function renderTabs() {
-    const container = document.getElementById('tabsContainer');
-    container.innerHTML = '';
-    tabsList.forEach(function(tabId) {
-        let count = tabId === 'Все склады' ? warehousesData.length : favorites.length;
-        const btn = document.createElement('button');
-        btn.className = `tab-button ${tabId === currentTab ? 'active' : ''}`;
-        btn.innerHTML = `${tabId} <span class="tab-count">${count}</span>`;
-        btn.onclick = function() {
-            currentTab = tabId; clearSearch(false); renderTabs(); renderCards();
-        };
-        container.appendChild(btn);
-    });
-}
+    let warehousesData = [];
+    let favorites = [];
+    let currentTab = 'Все склады';
+    let searchTimeout = null;
+    let rawTextToCopy = '';
+    let isUsingCache = false;
+    const memoryStore = {};
 
-function highlightText(text, query) {
-    if (!query || !text) return text || '';
-    const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    return text.replace(regex, '<mark class="highlight">$1</mark>');
-}
-
-function renderCards(filterQuery = '') {
-    const container = document.getElementById('contentArea');
-    container.innerHTML = '';
-    const isSearching = filterQuery.length > 0;
-    
-    let filtered = warehousesData.filter(function(item) {
-        if (isSearching) {
-            const q = filterQuery.toLowerCase();
-            const matchesId = item.ids.some(function(id) { return id.toLowerCase().includes(q); });
-            
-            return item.title.toLowerCase().includes(q) || 
-                   matchesId || 
-                   item.address.toLowerCase().includes(q);
-        }
-        if (currentTab === 'Избранное') return favorites.includes(item.id);
-        return true;
-    });
-
-    if (filtered.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <span style="font-size:48px;">🔍</span>
-                <h3>Склады не найдены</h3>
-                <p>По вашему запросу нет данных.</p>
-            </div>`;
-        return;
-    }
-
-    filtered.forEach(function(wh) {
-        const isFav = favorites.includes(wh.id);
-        const displayTitle = highlightText(wh.title, filterQuery);
-        const displayAddress = highlightText(wh.address, filterQuery);
-        const mapUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(wh.address)}`;
-
-        let idsHtml = '';
-        if (wh.ids.length > 0) {
-            idsHtml = wh.ids.map(function(id) {
-                const displayId = highlightText(id, filterQuery);
-                return `<span class="warehouse-id-badge">ID: ${displayId}</span>`;
-            }).join('');
-        } else {
-            idsHtml = `<span class="warehouse-id-badge">ID: N/A</span>`;
-        }
-
-        let specsHtml = `
-            <div class="spec-item"><span class="spec-label">Общая площадь ЛО</span><span class="spec-value">${wh.area}</span></div>
-            <div class="spec-item"><span class="spec-label">Ворота (СГТ)</span><span class="spec-value">${wh.gates}</span></div>
-        `;
-
-        if (wh.pmRoutes && wh.pmRoutes !== 'NaN' && wh.pmRoutes !== 'null') {
-            specsHtml += `<div class="spec-item"><span class="spec-label">Маршруты ПМ</span><span class="spec-value">${wh.pmRoutes}</span></div>`;
-        }
-        if (wh.mgRoutes && wh.mgRoutes !== 'NaN' && wh.mgRoutes !== 'null') {
-            specsHtml += `<div class="spec-item"><span class="spec-label">Маршруты МГ</span><span class="spec-value">${wh.mgRoutes}</span></div>`;
-        }
-        if (wh.storageType && wh.storageType !== 'NaN' && wh.storageType !== 'null') {
-            specsHtml += `<div class="spec-item" style="grid-column: 1 / -1;"><span class="spec-label">Тип хранения</span><span class="spec-value">${wh.storageType}</span></div>`;
-        }
-        if (wh.storagePlaces && wh.storagePlaces !== 'NaN' && wh.storagePlaces !== 'null') {
-            specsHtml += `<div class="spec-item"><span class="spec-label">Кол-во мест</span><span class="spec-value">${wh.storagePlaces}</span></div>`;
-        }
-        // ДОБАВЛЕНО ВЫВОД ПОЛЯ "ЗАПУСК МГТ"
-        if (wh.mgtLaunch && wh.mgtLaunch !== 'NaN' && wh.mgtLaunch !== 'null' && wh.mgtLaunch !== '-') {
-            specsHtml += `<div class="spec-item"><span class="spec-label">Запуск МГТ</span><span class="spec-value">${wh.mgtLaunch}</span></div>`;
-        }
-
-        const cardElement = document.createElement('div');
-        cardElement.className = `card status-${wh.statusColor}`;
-        cardElement.onclick = function() { openModal(wh.id); };
-
-        cardElement.innerHTML = `
-            <div class="card-header">
-                <div class="card-title-group">
-                    <div class="id-badges-container">
-                        ${idsHtml}
-                    </div>
-                    <h3>${displayTitle}</h3>
-                </div>
-                <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${wh.id}')">${isFav ? '★' : '☆'}</button>
-            </div>
-
-            <div class="tags-row">
-                ${wh.type !== '-' ? `<span class="tag">📦 ${wh.type}</span>` : ''}
-                ${wh.ownership !== '-' ? `<span class="tag">🏢 ${wh.ownership}</span>` : ''}
-                ${wh.fbo ? `<span class="tag tag-active">✅ ФБО</span>` : ''}
-                ${wh.fbs ? `<span class="tag tag-active">✅ ФБС</span>` : ''}
-                ${wh.brak ? `<span class="tag tag-warning">♻️ Брак</span>` : ''}
-            </div>
-
-            <div class="specs-grid">${specsHtml}</div>
-
-            <div class="address-box"><span class="address-icon">📍</span><span>${displayAddress}</span></div>
-
-            <div class="card-footer">
-                <div class="status-badge"><span class="dot"></span> ${wh.statusText}</div>
-                <a href="${mapUrl}" target="_blank" class="route-btn" onclick="event.stopPropagation();">Маршрут 🗺️</a>
-            </div>
-        `;
-        container.appendChild(cardElement);
-    });
-}
-
-function openModal(id) {
-    const wh = warehousesData.find(function(w) { return w.id === id; });
-    if (!wh) return;
-
-    let idsText = wh.ids.length > 0 ? wh.ids.join(', ') : 'N/A';
-    
-    let tags = [];
-    if(wh.type !== '-') tags.push(wh.type);
-    if(wh.ownership !== '-') tags.push(wh.ownership);
-    if(wh.fbo) tags.push('ФБО');
-    if(wh.fbs) tags.push('ФБС');
-    if(wh.brak) tags.push('Брак');
-    
-    let tagsStr = tags.length > 0 ? tags.join(', ') : 'Нет';
-
-    // Формируем дополнительную строку для окна, если "Запуск МГТ" заполнен
-    let mgtLaunchStr = (wh.mgtLaunch && wh.mgtLaunch !== 'NaN' && wh.mgtLaunch !== 'null' && wh.mgtLaunch !== '-') 
-        ? `\n🚀 Запуск МГТ: ${wh.mgtLaunch}` 
-        : '';
-
-    rawTextToCopy = `🏭 Склад: ${wh.title}
-🆔 ID: ${idsText}
-📍 Адрес: ${wh.address}
-
-📐 Площадь: ${wh.area}
-🚪 Ворота: ${wh.gates}
-🏷️ Категории: ${tagsStr}${mgtLaunchStr}`;
-
-    document.getElementById('copyContent').innerText = rawTextToCopy;
-    
-    const overlay = document.getElementById('modalOverlay');
-    const modal = document.getElementById('infoModal');
-    
-    overlay.style.display = 'block';
-    setTimeout(function() {
-        overlay.classList.add('active');
-        modal.classList.add('active');
-    }, 10);
-}
-
-function closeModal() {
-    const overlay = document.getElementById('modalOverlay');
-    const modal = document.getElementById('infoModal');
-    
-    overlay.classList.remove('active');
-    modal.classList.remove('active');
-    
-    setTimeout(function() {
-        overlay.style.display = 'none';
-        const btn = document.getElementById('btnCopyMain');
-        btn.innerHTML = '📋 Скопировать всё';
-        btn.style.background = 'var(--wb-gradient)';
-    }, 300);
-}
-
-function copyModalText() {
-    navigator.clipboard.writeText(rawTextToCopy).then(function() {
-        const btn = document.getElementById('btnCopyMain');
-        btn.innerHTML = '✅ Успешно скопировано!';
-        btn.style.background = '#10b981'; 
+    function initApp() {
+        favorites = safeGetJSON(STORAGE_KEYS.favorites, []);
+        if (!Array.isArray(favorites)) favorites = [];
         
-        setTimeout(function() {
-            closeModal();
-        }, 1200);
-    }).catch(function(err) {
-        alert('Не удалось скопировать. Возможно, ваш браузер это блокирует.');
-    });
-}
+        bindStaticEvents();
+        initTheme();
+        loadSheetData();
+    }
 
-function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.innerText = message; toast.classList.add('show');
-    setTimeout(function() { toast.classList.remove('show'); }, 2500);
-}
-
-function toggleFavorite(event, id) {
-    event.preventDefault(); event.stopPropagation(); 
-    if (favorites.includes(id)) {
-        favorites = favorites.filter(function(f) { return f !== id; });
-        showToast('Удалено из избранного');
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
     } else {
-        favorites.push(id); showToast('Добавлено в избранное');
+        initApp();
     }
-    localStorage.setItem('wb_wh_favorites_v3', JSON.stringify(favorites));
-    renderTabs(); 
-    renderCards(document.getElementById('searchInput').value.trim());
-}
 
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon();
-}
+    function bindStaticEvents() {
+        const themeBtn = document.getElementById('themeIcon');
+        const shareBtn = document.querySelector('.share-btn');
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        const copyBtn = document.getElementById('btnCopyMain');
+        const contentArea = document.getElementById('contentArea');
+        const tabsContainer = document.getElementById('tabsContainer');
 
-function updateThemeIcon() {
-    document.getElementById('themeIcon').innerText = document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️';
-}
+        if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+        if (shareBtn) shareBtn.addEventListener('click', shareApp);
 
-function toggleTheme() {
-    const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon();
-}
-
-function onSearchInput() {
-    const query = document.getElementById('searchInput').value.trim();
-    document.getElementById('clearSearchBtn').style.display = query.length > 0 ? 'flex' : 'none';
-    
-    clearTimeout(searchTimeout);
-    
-    searchTimeout = setTimeout(function() {
-        renderCards(query);
-    }, 300);
-}
-
-function clearSearch(shouldRender = true) {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('clearSearchBtn').style.display = 'none';
-    if (shouldRender) {
-        clearTimeout(searchTimeout); 
-        renderCards('');
-    }
-}
-
-async function shareApp() {
-    try {
-        const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-        const file = new File([new Blob([htmlContent], { type: "text/html" })], "Navigator_Warehouses.html", { type: "text/html" });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: 'Навигатор Складов', text: 'База данных складов.' });
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => renderCards(query.trim()), 250);
+            });
         }
-    } catch (e) { console.log(e); }
-}
+
+        if (clearBtn) clearBtn.addEventListener('click', () => clearSearch(true));
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                if (rawTextToCopy) copyToClipboard(rawTextToCopy);
+            });
+        }
+
+        if (tabsContainer) {
+            tabsContainer.addEventListener('click', (event) => {
+                const btn = event.target.closest('[data-tab]');
+                if (!btn) return;
+                currentTab = btn.dataset.tab;
+                clearSearch(false);
+                renderTabs();
+                renderCards();
+            });
+        }
+
+        if (contentArea) {
+            contentArea.addEventListener('click', (event) => {
+                const favBtn = event.target.closest('.fav-btn');
+                if (favBtn) {
+                    event.stopPropagation();
+                    toggleFavoriteById(favBtn.dataset.id);
+                    return;
+                }
+
+                const card = event.target.closest('.card');
+                if (card && !event.target.closest('a')) {
+                    const wh = warehousesData.find(w => w.id === card.dataset.id);
+                    if (wh) openModal(wh);
+                }
+            });
+
+            contentArea.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    const card = event.target.closest('.card');
+                    if (card) {
+                        event.preventDefault();
+                        const wh = warehousesData.find(w => w.id === card.dataset.id);
+                        if (wh) openModal(wh);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.close-modal') || event.target.id === 'modalOverlay') {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeModal();
+        });
+    }
+
+    function safeGetJSON(key, fallback) {
+        try {
+            if (HAS_STORAGE) {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            }
+        } catch (e) {}
+        return key in memoryStore ? memoryStore[key] : fallback;
+    }
+
+    function safeSetJSON(key, value) {
+        try {
+            if (HAS_STORAGE) {
+                localStorage.setItem(key, JSON.stringify(value));
+                return;
+            }
+        } catch (e) {}
+        memoryStore[key] = value;
+    }
+
+    function safeGetString(key, fallback = '') {
+        try {
+            if (HAS_STORAGE) return localStorage.getItem(key) || fallback;
+        } catch (e) {}
+        return key in memoryStore ? memoryStore[key] : fallback;
+    }
+
+    function safeSetString(key, value) {
+        try {
+            if (HAS_STORAGE) {
+                localStorage.setItem(key, value);
+                return;
+            }
+        } catch (e) {}
+        memoryStore[key] = value;
+    }
+
+    function initTheme() {
+        const saved = safeGetString(STORAGE_KEYS.theme, '');
+        if (saved === 'light' || saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', saved);
+        }
+        updateThemeIcon();
+    }
+
+    function toggleTheme() {
+        const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        const next = cur === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        safeSetString(STORAGE_KEYS.theme, next);
+        updateThemeIcon();
+    }
+
+    function updateThemeIcon() {
+        const btn = document.getElementById('themeIcon');
+        if (!btn) return;
+        btn.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️';
+    }
+
+    function hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash).toString(36);
+    }
+
+    function normalizeKeyPart(val) {
+        return String(val || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    function makeStableWarehouseId(title, ids, address) {
+        const base = [normalizeKeyPart(title), (ids || []).join('|'), normalizeKeyPart(address)].join('::');
+        return 'wh_' + hashString(base);
+    }
+
+    function getCellValue(row, colIndex) {
+        if (!row || !row.c || colIndex < 0 || colIndex >= row.c.length || !row.c[colIndex] || row.c[colIndex].v == null) {
+            return '';
+        }
+        return String(row.c[colIndex].v);
+    }
+
+    function normalizeMaybeEmpty(val) {
+        if (!val || val.trim() === '' || val.trim().toLowerCase() === 'n/a' || val.trim() === '-' || val.trim() === '---') return '';
+        return val.trim();
+    }
+
+    function parseSheetTableStrict(tableData) {
+        const rows = tableData.rows || [];
+        if (rows.length === 0) return [];
+        const parsed = [];
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || !row.c) continue;
+
+            const title = getCellValue(row, 1).trim();
+            if (!title || title.toLowerCase() === 'склад') continue;
+
+            let ids = [];
+            [2, 3, 4, 5].forEach(idx => {
+                const val = getCellValue(row, idx).trim();
+                if (val && val !== '---' && !ids.includes(val)) ids.push(val);
+            });
+
+            const fbs = getCellValue(row, 8).toLowerCase().includes('да');
+            const fbo = getCellValue(row, 9).toLowerCase().includes('да');
+            const brak = getCellValue(row, 10).toLowerCase().includes('да');
+            const type = getCellValue(row, 11).trim();      
+            const ownership = getCellValue(row, 12).trim(); 
+            
+            let area = normalizeMaybeEmpty(getCellValue(row, 13));
+            if (area && !area.toLowerCase().includes('кв')) area += ' кв.м';
+
+            let gates = normalizeMaybeEmpty(getCellValue(row, 16));
+            if (gates && !gates.toLowerCase().includes('ворот')) gates += ' Ворот';
+
+            const address = getCellValue(row, 17).trim(); 
+            const routesPm = normalizeMaybeEmpty(getCellValue(row, 18)); 
+            const routesMg = normalizeMaybeEmpty(getCellValue(row, 19)); 
+
+            let storageTypes = [];
+            if (getCellValue(row, 20).trim()) storageTypes.push('Стеллажное');
+            if (getCellValue(row, 21).trim()) storageTypes.push('Напольное');
+            if (getCellValue(row, 22).trim()) storageTypes.push('Кламперное');
+            const storageType = storageTypes.length > 0 ? storageTypes.join(', ') : '';
+
+            const mgtLaunch = normalizeMaybeEmpty(getCellValue(row, 24)); 
+
+            const statusRaw = getCellValue(row, 6).trim();
+            const statusLower = statusRaw.toLowerCase();
+            let statusColor = 'red';
+            let statusText = statusRaw || 'не Активен';
+
+            if (statusLower.includes('не') || statusLower.includes('закр') || statusLower.includes('нет')) {
+                statusColor = 'red'; statusText = 'не Активен';
+            } else if (statusLower.includes('актив') || statusLower.includes('да')) {
+                statusColor = 'green'; statusText = 'Активен';
+            } else if (statusLower.includes('сц')) {
+                statusColor = 'yellow'; statusText = statusRaw;
+            }
+
+            const whId = makeStableWarehouseId(title, ids, address);
+            const searchIndex = [title, ids.join(' '), address, area, gates, routesPm, routesMg, storageType, mgtLaunch, type, ownership, statusText].join(' ').toLowerCase();
+
+            parsed.push({
+                id: whId, title, ids, address, statusText, statusColor, area, gates, routesPm, routesMg, storageType, mgtLaunch, fbo, fbs, brak, type, ownership, searchIndex
+            });
+        }
+        return parsed;
+    }
+
+    function renderLoadingState() {
+        const container = document.getElementById('contentArea');
+        if (!container) return;
+        container.textContent = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'empty-state';
+        
+        const icon = document.createElement('span');
+        icon.style.cssText = 'font-size:48px; display:inline-block; animation: spin 1.5s linear infinite; margin-bottom: 10px;';
+        icon.textContent = '⏳';
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Загрузка актуальных данных...';
+        
+        const desc = document.createElement('p');
+        desc.style.cssText = 'color: var(--text-muted); font-size: 14px;';
+        desc.textContent = 'Синхронизируем список складов с Google Таблицей.';
+        
+        wrapper.append(icon, title, desc);
+        container.appendChild(wrapper);
+    }
+
+    function showLoadError() {
+        const cachedRaw = safeGetJSON(STORAGE_KEYS.cache, null);
+        if (cachedRaw && Array.isArray(cachedRaw) && cachedRaw.length > 0) {
+            warehousesData = cachedRaw;
+            isUsingCache = true;
+            document.getElementById('offlineBadge').classList.add('visible');
+            
+            favorites = favorites.filter(favId => warehousesData.some(w => w.id === favId));
+            safeSetJSON(STORAGE_KEYS.favorites, favorites);
+            
+            renderTabs();
+            renderCards();
+            showToast('⚠️ Ошибка сети. Загружены последние сохраненные данные.');
+            return;
+        }
+
+        const container = document.getElementById('contentArea');
+        if (!container) return;
+        container.textContent = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'empty-state';
+        
+        const title = document.createElement('h3');
+        title.style.color = '#ef4444';
+        title.textContent = '⚠️ Ошибка подключения к базе';
+        
+        const desc = document.createElement('p');
+        desc.style.cssText = 'color: var(--text-muted); font-size: 14px; margin-bottom: 24px;';
+        desc.textContent = 'Не удалось получить данные из таблицы, а локальный кэш пуст. Проверьте интернет.';
+        
+        const retryBtn = document.createElement('button');
+        retryBtn.className = 'btn-copy-big';
+        retryBtn.style.width = 'auto';
+        retryBtn.style.padding = '12px 24px';
+        retryBtn.style.display = 'inline-flex';
+        retryBtn.textContent = '🔄 Повторить загрузку';
+        retryBtn.addEventListener('click', loadSheetData);
+
+        wrapper.append(title, desc, retryBtn);
+        container.appendChild(wrapper);
+    }
+
+    function loadSheetData() {
+        renderLoadingState();
+        
+        const scriptId = 'jsonp_' + Math.random().toString(36).slice(2);
+        const callbackName = 'handler_' + Math.random().toString(36).slice(2);
+        const script = document.createElement('script');
+        script.id = scriptId;
+        
+        const cleanup = () => {
+            delete window[callbackName];
+            const s = document.getElementById(scriptId);
+            if (s) s.remove();
+        };
+
+        const timeout = setTimeout(() => {
+            cleanup();
+            showLoadError();
+        }, 6000);
+
+        window[callbackName] = function(data) {
+            clearTimeout(timeout);
+            cleanup();
+            if (data && data.table) {
+                warehousesData = parseSheetTableStrict(data.table);
+                isUsingCache = false;
+                document.getElementById('offlineBadge').classList.remove('visible');
+                
+                // Сохраняем успешный снимок в кэш
+                safeSetJSON(STORAGE_KEYS.cache, warehousesData);
+                
+                favorites = favorites.filter(favId => warehousesData.some(w => w.id === favId));
+                safeSetJSON(STORAGE_KEYS.favorites, favorites);
+                
+                renderTabs();
+                renderCards();
+            } else {
+                showLoadError();
+            }
+        };
+
+        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:${callbackName}`;
+        script.onerror = () => { clearTimeout(timeout); cleanup(); showLoadError(); };
+
+        document.body.appendChild(script);
+    }
+
+    function clearSearch(doRender = true) {
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (searchInput) searchInput.value = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (doRender) renderCards();
+    }
+
+    function renderTabs() {
+        const container = document.getElementById('tabsContainer');
+        if (!container) return;
+        container.textContent = '';
+        
+        const createTab = (name, count, isActive) => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-button' + (isActive ? ' active' : '');
+            btn.dataset.tab = name;
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            
+            const textNode = document.createTextNode(name + ' ');
+            const span = document.createElement('span');
+            span.className = 'tab-count';
+            span.textContent = count;
+            
+            btn.appendChild(textNode);
+            btn.appendChild(span);
+            return btn;
+        };
+
+        container.appendChild(createTab('Все склады', warehousesData.length, currentTab === 'Все склады'));
+        container.appendChild(createTab('Избранное', favorites.length, currentTab === 'Избранное'));
+    }
+
+    function createHighlightedFragment(text, query) {
+        const fragment = document.createDocumentFragment();
+        const safeText = String(text || '');
+
+        if (!query) {
+            fragment.appendChild(document.createTextNode(safeText));
+            return fragment;
+        }
+
+        const escapedQuery = query.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(escapedQuery, 'ig');
+        let lastIndex = 0;
+        let match;
+        
+        while ((match = regex.exec(safeText)) !== null) {
+            if (match.index > lastIndex) {
+                fragment.appendChild(document.createTextNode(safeText.substring(lastIndex, match.index)));
+            }
+            const mark = document.createElement('mark');
+            mark.className = 'highlight';
+            mark.textContent = match[0];
+            fragment.appendChild(mark);
+            lastIndex = regex.lastIndex;
+        }
+        
+        if (lastIndex < safeText.length) {
+            fragment.appendChild(document.createTextNode(safeText.substring(lastIndex)));
+        }
+        return fragment;
+    }
+
+    function renderCards(query = '') {
+        const container = document.getElementById('contentArea');
+        if (!container) return;
+        
+        const searchTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+        
+        const filtered = warehousesData.filter(wh => {
+            if (currentTab === 'Избранное' && !favorites.includes(wh.id)) return false;
+            if (searchTerms.length > 0) return searchTerms.every(term => wh.searchIndex.includes(term));
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            container.textContent = '';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'empty-state';
+            
+            const icon = document.createElement('span');
+            icon.style.cssText = 'font-size:40px; display:inline-block; margin-bottom: 10px;';
+            icon.textContent = '🤷‍♂️';
+            
+            const title = document.createElement('h3');
+            title.textContent = 'Ничего не найдено';
+            
+            const desc = document.createElement('p');
+            desc.style.cssText = 'color: var(--text-muted); font-size: 14px;';
+            desc.textContent = 'По вашему запросу нет складов в выбранной категории.';
+            
+            wrapper.append(icon, title, desc);
+            container.appendChild(wrapper);
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        filtered.forEach(wh => {
+            const isFav = favorites.includes(wh.id);
+            const card = document.createElement('div');
+            card.className = `card status-${wh.statusColor}`;
+            card.dataset.id = wh.id;
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Открыть информацию о складе ${wh.title}`);
+
+            const header = document.createElement('div');
+            header.className = 'card-header';
+            
+            const titleGroup = document.createElement('div');
+            titleGroup.className = 'card-title-group';
+
+            if (wh.ids.length > 0) {
+                const idContainer = document.createElement('div');
+                idContainer.className = 'id-badges-container';
+                wh.ids.forEach(idVal => {
+                    const badge = document.createElement('span');
+                    badge.className = 'warehouse-id-badge';
+                    badge.appendChild(createHighlightedFragment(`ID: ${idVal}`, query));
+                    idContainer.appendChild(badge);
+                });
+                titleGroup.appendChild(idContainer);
+            }
+            
+            const titleH3 = document.createElement('h3');
+            titleH3.appendChild(createHighlightedFragment(wh.title, query));
+            titleGroup.appendChild(titleH3);
+            header.appendChild(titleGroup);
+
+            const favBtn = document.createElement('button');
+            favBtn.className = 'fav-btn' + (isFav ? ' active' : '');
+            favBtn.dataset.id = wh.id;
+            favBtn.type = 'button';
+            favBtn.setAttribute('aria-label', isFav ? 'Удалить из избранного' : 'Добавить в избранное');
+            favBtn.textContent = isFav ? '★' : '☆';
+            header.appendChild(favBtn);
+            
+            card.appendChild(header);
+
+            const tagsRow = document.createElement('div');
+            tagsRow.className = 'tags-row';
+            if (wh.type) { const t = document.createElement('span'); t.className = 'tag tag-type'; t.textContent = `📦 ${wh.type}`; tagsRow.appendChild(t); }
+            if (wh.ownership) { const t = document.createElement('span'); t.className = 'tag tag-ownership'; t.textContent = `🏢 ${wh.ownership}`; tagsRow.appendChild(t); }
+            if (wh.fbo) { const t = document.createElement('span'); t.className = 'tag tag-active'; t.textContent = '✅ ФБО'; tagsRow.appendChild(t); }
+            if (wh.fbs) { const t = document.createElement('span'); t.className = 'tag tag-active'; t.textContent = '✅ ФБС'; tagsRow.appendChild(t); }
+            if (wh.brak) { const t = document.createElement('span'); t.className = 'tag tag-warning'; t.textContent = '⚠️ Брак'; tagsRow.appendChild(t); }
+            if(tagsRow.hasChildNodes()) card.appendChild(tagsRow);
+
+            const specs = document.createElement('div');
+            specs.className = 'specs-grid';
+
+            const addSpec = (label, valueText, isFullWidth = false) => {
+                if (!valueText) return;
+                const item = document.createElement('div');
+                item.className = 'spec-item' + (isFullWidth ? ' full-width' : '');
+                
+                const lbl = document.createElement('span');
+                lbl.className = 'spec-label';
+                lbl.textContent = label;
+                item.appendChild(lbl);
+
+                const val = document.createElement('span');
+                val.className = 'spec-value';
+                val.appendChild(createHighlightedFragment(valueText, query));
+                item.appendChild(val);
+                specs.appendChild(item);
+            };
+
+            addSpec('Общая площадь ЛО', wh.area);
+            addSpec('Ворота (СГТ)', wh.gates);
+            addSpec('Маршруты ПМ', wh.routesPm);
+            addSpec('Маршруты МГ', wh.routesMg);
+            addSpec('Тип хранения', wh.storageType, true);
+            addSpec('Запуск МГТ', wh.mgtLaunch);
+
+            if(specs.hasChildNodes()) card.appendChild(specs);
+
+            if (wh.address) {
+                const addressBox = document.createElement('div');
+                addressBox.className = 'address-box';
+                const addrIcon = document.createElement('span');
+                addrIcon.className = 'address-icon';
+                addrIcon.textContent = '📍';
+                const addrText = document.createElement('span');
+                addrText.appendChild(createHighlightedFragment(wh.address, query));
+                addressBox.append(addrIcon, addrText);
+                card.appendChild(addressBox);
+            }
+
+            const footer = document.createElement('div');
+            footer.className = 'card-footer';
+            
+            const statusBadge = document.createElement('div');
+            statusBadge.className = 'status-badge';
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            const statusText = document.createTextNode(wh.statusText);
+            statusBadge.append(dot, statusText);
+            footer.appendChild(statusBadge);
+
+            const mapQuery = encodeURIComponent(wh.address || wh.title);
+            const routeBtn = document.createElement('a');
+            routeBtn.className = 'route-btn';
+            routeBtn.href = `https://yandex.ru/maps/?text=${mapQuery}`;
+            routeBtn.target = '_blank';
+            routeBtn.rel = 'noopener noreferrer';
+            routeBtn.textContent = '🗺️ Маршрут';
+            routeBtn.addEventListener('click', (e) => e.stopPropagation());
+            
+            footer.appendChild(routeBtn);
+            card.appendChild(footer);
+            fragment.appendChild(card);
+        });
+
+        container.textContent = '';
+        container.appendChild(fragment);
+    }
+
+    function toggleFavoriteById(id) {
+        if (!id) return;
+        const index = favorites.indexOf(id);
+        if (index > -1) {
+            favorites.splice(index, 1);
+            showToast('Удалено из избранного');
+        } else {
+            favorites.push(id);
+            showToast('Добавлено в избранное');
+        }
+        safeSetJSON(STORAGE_KEYS.favorites, favorites);
+        renderTabs();
+        
+        if (currentTab === 'Избранное') {
+            const searchInput = document.getElementById('searchInput');
+            renderCards(searchInput ? searchInput.value : '');
+        } else {
+            const favBtns = document.querySelectorAll(`.fav-btn[data-id="${id}"]`);
+            favBtns.forEach(btn => {
+                const isFav = favorites.includes(id);
+                btn.classList.toggle('active', isFav);
+                btn.textContent = isFav ? '★' : '☆';
+                btn.setAttribute('aria-label', isFav ? 'Удалить из избранного' : 'Добавить в избранное');
+            });
+        }
+    }
+
+    function openModal(wh) {
+        const overlay = document.getElementById('modalOverlay');
+        const modal = document.getElementById('infoModal');
+        const listContainer = document.getElementById('modalList');
+        if (!overlay || !modal || !listContainer) return;
+
+        const pmMg = (wh.routesPm || wh.routesMg) ? `${wh.routesPm || '0'} / ${wh.routesMg || '0'}` : '';
+
+        const fields = [
+            { label: 'Склад', value: wh.title },
+            { label: 'ID Блоков', value: wh.ids.join(', ') },
+            { label: 'Статус', value: wh.statusText },
+            { label: 'Адрес', value: wh.address },
+            { label: 'Общая площадь ЛО', value: wh.area },
+            { label: 'Ворота (СГТ)', value: wh.gates },
+            { label: 'Аренда / Собственность', value: wh.ownership },
+            { label: 'Тип хранения', value: wh.storageType },
+            { label: 'Кол-во маршрутов ПМ/МГ', value: pmMg },
+            { label: 'Запуск МГТ', value: wh.mgtLaunch },
+            { label: 'ФБО', value: wh.fbo ? 'Да' : '' },
+            { label: 'ФБС', value: wh.fbs ? 'Да' : '' },
+            { label: 'Брак', value: wh.brak ? 'Да' : '' }
+        ].filter(f => f.value);
+
+        rawTextToCopy = fields.map(f => `${f.label}: ${f.value}`).join('\n');
+
+        listContainer.textContent = '';
+        fields.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'modal-list-item';
+            
+            const title = document.createElement('div');
+            title.className = 'modal-list-title';
+            title.textContent = item.label;
+            
+            const val = document.createElement('div');
+            val.className = 'modal-list-value';
+            val.textContent = item.value;
+            
+            div.append(title, val);
+            listContainer.appendChild(div);
+        });
+        
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.classList.add('active');
+            modal.classList.add('active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const overlay = document.getElementById('modalOverlay');
+        const modal = document.getElementById('infoModal');
+        if (!overlay || !modal) return;
+
+        overlay.classList.remove('active');
+        modal.classList.remove('active');
+        
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function copyToClipboard(text) {
+        const fallbackCopy = () => {
+            try {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                textArea.remove();
+                if (successful) {
+                    showToast('Данные скопированы!');
+                } else {
+                    showToast('Не удалось скопировать данные');
+                }
+            } catch (err) {
+                showToast('Ошибка копирования в буфер');
+            }
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Данные скопированы!');
+            }).catch(() => {
+                fallbackCopy();
+            });
+        } else {
+            fallbackCopy();
+        }
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    async function shareApp() {
+        const currentUrl = window.location.href;
+        const isLocalFile = currentUrl.startsWith('file://');
+        
+        const shareData = { 
+            title: 'Склады WB', 
+            text: 'Удобный навигатор по складам', 
+            url: isLocalFile ? window.location.origin + window.location.pathname : currentUrl 
+        };
+        
+        try {
+            if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
+                await navigator.share(shareData);
+            } else if (navigator.share) {
+                await navigator.share({ title: shareData.title, text: shareData.text });
+            } else {
+                copyToClipboard(isLocalFile ? document.title : currentUrl);
+                showToast(isLocalFile ? 'Название файла скопировано!' : 'Ссылка скопирована!');
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                copyToClipboard(currentUrl);
+            }
+        }
+    }
 </script>
 </body>
 </html>
