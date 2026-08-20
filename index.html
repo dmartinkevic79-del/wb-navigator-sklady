@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навигатор по Складам WB</title>
+    <title>Навигатор по складам WB</title>
     
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wildberries_logo_2021.svg/1200px-Wildberries_logo_2021.svg.png">
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wildberries_logo_2021.svg/1200px-Wildberries_logo_2021.svg.png">
@@ -22,7 +22,6 @@
             --tag-bg: rgba(255, 255, 255, 0.05);
             --tag-text: #cbd5e1;
 
-            /* Контрастные цвета для Тёмной темы */
             --id-badge-text: #ff71e1;
             --id-badge-bg: rgba(203, 17, 171, 0.18);
             --id-badge-border: rgba(203, 17, 171, 0.35);
@@ -57,7 +56,6 @@
             --tag-bg: rgba(15, 23, 42, 0.04);
             --tag-text: #334155;
 
-            /* Читаемые высококонтрастные цвета для Светлой темы */
             --id-badge-text: #86198f;
             --id-badge-bg: rgba(203, 17, 171, 0.1);
             --id-badge-border: rgba(203, 17, 171, 0.25);
@@ -173,6 +171,18 @@
 
         .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-hover); }
 
+        .link-card {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 22px; display: flex; flex-direction: column; text-decoration: none; color: inherit;
+            transition: all 0.25s ease; position: relative; overflow: hidden;
+        }
+        .link-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--wb-accent); }
+        .link-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .link-card-icon { font-size: 28px; line-height: 1; }
+        .link-card h3 { margin: 0; font-size: 18px; font-weight: 800; color: var(--text-main); flex-grow: 1; }
+        .link-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; flex-grow: 1; }
+        .link-card-action { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--wb-accent); margin-top: auto; }
+
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px; }
         .card-title-group { display: flex; flex-direction: column; gap: 6px; max-width: 85%; }
         .card h3 { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.3; color: var(--text-main); }
@@ -180,9 +190,7 @@
         .id-badges-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
         .warehouse-id-badge { 
             display: inline-block; font-size: 11px; font-weight: 800; 
-            color: var(--id-badge-text); 
-            background: var(--id-badge-bg); 
-            border: 1px solid var(--id-badge-border);
+            color: var(--id-badge-text); background: var(--id-badge-bg); border: 1px solid var(--id-badge-border);
             padding: 2px 8px; border-radius: 6px; width: fit-content; 
         }
 
@@ -221,30 +229,19 @@
         .route-btn:hover, .route-btn:focus-visible { opacity: 0.9; box-shadow: 0 0 0 2px rgba(203, 17, 171, 0.5); }
 
         .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; }
-        
-        .footer-copyright { 
-            text-align: center; margin-top: auto; padding-top: 36px; padding-bottom: 20px;
-            font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); opacity: 0.5; 
-        }
+        .footer-copyright { text-align: center; margin-top: auto; padding-top: 36px; padding-bottom: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); opacity: 0.5; }
 
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-color); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: bottom 0.4s ease; z-index: 2000; }
         #toast.show { bottom: 40px; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); z-index: 2000;
-            display: none; opacity: 0; transition: opacity 0.3s ease;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.active { opacity: 1; }
 
         .modal-bottom {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background-color: var(--card-bg);
+            position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--card-bg);
             border-radius: 20px 20px 0 0; padding: 24px 20px; z-index: 2001;
             transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
-            border-top: 1px solid var(--border-color);
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.4); border-top: 1px solid var(--border-color);
         }
         .modal-bottom.active { transform: translateY(0); }
 
@@ -258,11 +255,7 @@
         .modal-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
         .modal-list-value { font-size: 14px; font-weight: 700; color: var(--text-main); text-align: right; word-break: break-word; max-width: 65%; }
         
-        .btn-copy-big {
-            width: 100%; background: var(--wb-gradient); color: white; border: none;
-            padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700;
-            cursor: pointer; transition: opacity 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; outline: none;
-        }
+        .btn-copy-big { width: 100%; background: var(--wb-gradient); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; outline: none; }
         .btn-copy-big:hover, .btn-copy-big:focus-visible { opacity: 0.9; box-shadow: 0 0 0 2px rgba(203, 17, 171, 0.5); }
 
         @media (min-width: 768px) {
@@ -289,9 +282,7 @@
             <button id="clearSearchBtn" class="clear-btn" aria-label="Очистить поиск">&times;</button>
         </div>
 
-        <nav class="nav-tabs" id="tabsContainer" role="tablist">
-            <!-- Вкладки генерируются через JS -->
-        </nav>
+        <nav class="nav-tabs" id="tabsContainer" role="tablist"></nav>
     </div>
 
     <div class="content-padding">
@@ -314,12 +305,14 @@
 
 <script>
     const SHEET_ID = '1iZnxEpS-KkxqVZjI_C4dAM71nYpLfBuQagDE-rfY-xU';
-    const SHEET_NAME = 'Лист1';
+    const WAREHOUSES_SHEET_NAME = 'Склады';
+    const LINKS_SHEET_NAME = 'Таблицы';
 
     const STORAGE_KEYS = {
         favorites: 'wb_wh_favorites_v6',
         theme: 'wb_theme_v1',
-        cache: 'wb_wh_cache_v1'
+        cache: 'wb_wh_cache_v1',
+        linksCache: 'wb_links_cache_v1'
     };
 
     const HAS_STORAGE = (function() {
@@ -332,11 +325,11 @@
     })();
 
     let warehousesData = [];
+    let linksData = [];
     let favorites = [];
     let currentTab = 'Все склады';
     let searchTimeout = null;
     let rawTextToCopy = '';
-    let isUsingCache = false;
     const memoryStore = {};
 
     function initApp() {
@@ -535,8 +528,6 @@
             if (!rawTitle || rawTitle.toLowerCase() === 'склад') continue;
 
             let ids = [];
-            
-            // 1. Извлекаем ID из скобок в самом заголовке (например: "Невинномысск КБТ ( 301562 )")
             const titleIdMatches = rawTitle.match(/\((?:ID:\s*)?(\d+)\)/gi);
             if (titleIdMatches) {
                 titleIdMatches.forEach(m => {
@@ -545,13 +536,11 @@
                 });
             }
 
-            // Очищаем заголовок от скобок с ID
             let title = rawTitle
                 .replace(/\s*\((?:ID:\s*)?\d+\)\s*/gi, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
 
-            // 2. Извлекаем ID из колонок 2, 3, 4, 5
             [2, 3, 4, 5].forEach(idx => {
                 const val = getCellValue(row, idx).trim();
                 if (val && val !== '---' && !ids.includes(val)) ids.push(val);
@@ -604,6 +593,63 @@
         return parsed;
     }
 
+    function parseLinksTable(tableData) {
+        const rows = tableData.rows || [];
+        if (rows.length === 0) return [];
+        const parsed = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || !row.c) continue;
+
+            const title = getCellValue(row, 0).trim();
+            if (!title || title.toLowerCase() === 'название') continue;
+
+            const desc = getCellValue(row, 1).trim();
+            const url = getCellValue(row, 2).trim();
+            const icon = getCellValue(row, 3).trim() || '📊';
+
+            if (url) {
+                parsed.push({
+                    title, desc, url, icon,
+                    searchIndex: (title + ' ' + desc).toLowerCase()
+                });
+            }
+        }
+        return parsed;
+    }
+
+    function fetchJSONP(sheetName) {
+        return new Promise((resolve) => {
+            const scriptId = 'jsonp_' + Math.random().toString(36).slice(2);
+            const callbackName = 'handler_' + Math.random().toString(36).slice(2);
+            const script = document.createElement('script');
+            script.id = scriptId;
+
+            const cleanup = () => {
+                delete window[callbackName];
+                const s = document.getElementById(scriptId);
+                if (s) s.remove();
+            };
+
+            const timeout = setTimeout(() => {
+                cleanup();
+                resolve(null);
+            }, 6000);
+
+            window[callbackName] = function(data) {
+                clearTimeout(timeout);
+                cleanup();
+                resolve(data && data.table ? data.table : null);
+            };
+
+            script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=responseHandler:${callbackName}`;
+            script.onerror = () => { clearTimeout(timeout); cleanup(); resolve(null); };
+
+            document.body.appendChild(script);
+        });
+    }
+
     function renderLoadingState() {
         const container = document.getElementById('contentArea');
         if (!container) return;
@@ -621,17 +667,19 @@
         
         const desc = document.createElement('p');
         desc.style.cssText = 'color: var(--text-muted); font-size: 14px;';
-        desc.textContent = 'Синхронизируем список складов с Google Таблицей.';
+        desc.textContent = 'Синхронизируем список складов и ссылок с Google Таблицей.';
         
         wrapper.append(icon, title, desc);
         container.appendChild(wrapper);
     }
 
     function showLoadError() {
-        const cachedRaw = safeGetJSON(STORAGE_KEYS.cache, null);
-        if (cachedRaw && Array.isArray(cachedRaw) && cachedRaw.length > 0) {
-            warehousesData = cachedRaw;
-            isUsingCache = true;
+        const cachedWh = safeGetJSON(STORAGE_KEYS.cache, null);
+        const cachedLinks = safeGetJSON(STORAGE_KEYS.linksCache, null);
+
+        if (cachedWh && Array.isArray(cachedWh) && cachedWh.length > 0) {
+            warehousesData = cachedWh;
+            linksData = cachedLinks || [];
             document.getElementById('offlineBadge').classList.add('visible');
             
             favorites = favorites.filter(favId => warehousesData.some(w => w.id === favId));
@@ -670,49 +718,32 @@
         container.appendChild(wrapper);
     }
 
-    function loadSheetData() {
+    async function loadSheetData() {
         renderLoadingState();
-        
-        const scriptId = 'jsonp_' + Math.random().toString(36).slice(2);
-        const callbackName = 'handler_' + Math.random().toString(36).slice(2);
-        const script = document.createElement('script');
-        script.id = scriptId;
-        
-        const cleanup = () => {
-            delete window[callbackName];
-            const s = document.getElementById(scriptId);
-            if (s) s.remove();
-        };
 
-        const timeout = setTimeout(() => {
-            cleanup();
-            showLoadError();
-        }, 6000);
+        const [whTable, linksTable] = await Promise.all([
+            fetchJSONP(WAREHOUSES_SHEET_NAME),
+            fetchJSONP(LINKS_SHEET_NAME)
+        ]);
 
-        window[callbackName] = function(data) {
-            clearTimeout(timeout);
-            cleanup();
-            if (data && data.table) {
-                warehousesData = parseSheetTableStrict(data.table);
-                isUsingCache = false;
-                document.getElementById('offlineBadge').classList.remove('visible');
-                
-                safeSetJSON(STORAGE_KEYS.cache, warehousesData);
-                
-                favorites = favorites.filter(favId => warehousesData.some(w => w.id === favId));
-                safeSetJSON(STORAGE_KEYS.favorites, favorites);
-                
-                renderTabs();
-                renderCards();
-            } else {
-                showLoadError();
+        if (whTable) {
+            warehousesData = parseSheetTableStrict(whTable);
+            document.getElementById('offlineBadge').classList.remove('visible');
+            safeSetJSON(STORAGE_KEYS.cache, warehousesData);
+            
+            if (linksTable) {
+                linksData = parseLinksTable(linksTable);
+                safeSetJSON(STORAGE_KEYS.linksCache, linksData);
             }
-        };
 
-        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:${callbackName}`;
-        script.onerror = () => { clearTimeout(timeout); cleanup(); showLoadError(); };
-
-        document.body.appendChild(script);
+            favorites = favorites.filter(favId => warehousesData.some(w => w.id === favId));
+            safeSetJSON(STORAGE_KEYS.favorites, favorites);
+            
+            renderTabs();
+            renderCards();
+        } else {
+            showLoadError();
+        }
     }
 
     function clearSearch(doRender = true) {
@@ -747,6 +778,7 @@
 
         container.appendChild(createTab('Все склады', warehousesData.length, currentTab === 'Все склады'));
         container.appendChild(createTab('Избранное', favorites.length, currentTab === 'Избранное'));
+        container.appendChild(createTab('Полезные таблицы', linksData.length, currentTab === 'Полезные таблицы'));
     }
 
     function createHighlightedFragment(text, query) {
@@ -783,9 +815,61 @@
     function renderCards(query = '') {
         const container = document.getElementById('contentArea');
         if (!container) return;
-        
+
         const searchTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-        
+
+        if (currentTab === 'Полезные таблицы') {
+            const filteredLinks = linksData.filter(link => {
+                if (searchTerms.length > 0) return searchTerms.every(term => link.searchIndex.includes(term));
+                return true;
+            });
+
+            if (filteredLinks.length === 0) {
+                container.textContent = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'empty-state';
+                wrapper.innerHTML = '<h3>Таблицы не найдены</h3><p style="color:var(--text-muted);font-size:14px;">По вашему запросу ничего не найдено.</p>';
+                container.appendChild(wrapper);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            filteredLinks.forEach(item => {
+                const a = document.createElement('a');
+                a.className = 'link-card';
+                a.href = item.url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+
+                const header = document.createElement('div');
+                header.className = 'link-card-header';
+                
+                const icon = document.createElement('span');
+                icon.className = 'link-card-icon';
+                icon.textContent = item.icon;
+
+                const h3 = document.createElement('h3');
+                h3.appendChild(createHighlightedFragment(item.title, query));
+
+                header.append(icon, h3);
+
+                const desc = document.createElement('div');
+                desc.className = 'link-card-desc';
+                desc.appendChild(createHighlightedFragment(item.desc, query));
+
+                const action = document.createElement('div');
+                action.className = 'link-card-action';
+                action.textContent = 'Открыть таблицу ↗';
+
+                a.append(header, desc, action);
+                fragment.appendChild(a);
+            });
+
+            container.textContent = '';
+            container.appendChild(fragment);
+            return;
+        }
+
         const filtered = warehousesData.filter(wh => {
             if (currentTab === 'Избранное' && !favorites.includes(wh.id)) return false;
             if (searchTerms.length > 0) return searchTerms.every(term => wh.searchIndex.includes(term));
